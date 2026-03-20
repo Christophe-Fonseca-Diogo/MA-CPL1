@@ -3,6 +3,11 @@
 
 Résultat :
 
+La première fois on peut apercevoir ce résultat :
+
+<img width="483" height="263" alt="image" src="https://github.com/user-attachments/assets/f1ff5745-cdc1-4ef3-a62d-4e35bc8a34ed" />
+
+Ensuite on obtient le résultat suivant.
 
 ```json
 {
@@ -13,3 +18,5 @@ Résultat :
   "outlookCategory": "Appointment Request"
 }
 ```
+
+Le TP est fonctionnel.
