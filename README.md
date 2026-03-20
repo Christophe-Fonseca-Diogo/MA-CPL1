@@ -18,5 +18,7 @@ Ensuite on obtient le résultat suivant.
   "outlookCategory": "Appointment Request"
 }
 ```
+On voit que le workflow est correctement exécuté.
+<img width="712" height="170" alt="image" src="https://github.com/user-attachments/assets/7510b555-2110-4e05-87d6-7cdebafc57d1" />
 
 Le TP est fonctionnel.
