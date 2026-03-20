@@ -1,0 +1,139 @@
+{
+  "name": "TP1_Email_Classifier_ChristopheFonsecaDiogo",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {},
+        "options": {}
+      },
+      "type": "n8n-nodes-base.microsoftOutlookTrigger",
+      "typeVersion": 1,
+      "position": [
+        -176,
+        -128
+      ],
+      "id": "8786ee65-cb4a-47b5-9811-19a481bd9f57",
+      "name": "Microsoft Outlook Trigger",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "1jTFr21XJm7DQkAv",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://gpu.cpnv.me:11434/api/generate ",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "Matheswaran/email-classifier:latest"
+            },
+            {
+              "name": "prompt",
+              "value": "={{ \"Classify the following email and return JSON only.\\n\\n\" + \n$json.emailText }} "
+            },
+            {
+              "name": "stream",
+              "value": "={{false}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        240,
+        -128
+      ],
+      "id": "096a3a3c-a835-49d7-84ab-83c9f109c157",
+      "name": "Envois à API Ollama"
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => { \nconst email = item.json; \nconst subject = email.subject || \"\"; \nconst body = email.bodyPreview || \"\"; \nconst sender = email.from || \"\"; \nconst messageId = email.id || \"\"; \nconst emailText = `Objet: ${subject} \nExpéditeur: ${sender} \nMessage: \n${body}`; \nreturn { \njson: { \nmessageId, \nsubject, \nsender, \nbody, \nemailText \n} \n}; \n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        32,
+        -128
+      ],
+      "id": "35687af5-8838-4340-9c96-390bb395e91f",
+      "name": "Prépare données"
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  const parsed = JSON.parse(item.json.response);\n  const classification = parsed.classifications?.[0] || {};\n\n  return {\n    json: {\n      requestType: classification.requestType || \"\",\n      requestSubType: classification.requestSubType?.[0] || \"\",\n      confidenceScore: parsed.confidenceScore || null,\n      reasoning: parsed.reasoning || \"\",\n      outlookCategory: classification.requestType || \"Other\"\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        -128
+      ],
+      "id": "289a4356-bbc6-448f-b385-daac5dd0b3c3",
+      "name": "Mise en forme données"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Microsoft Outlook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Prépare données",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prépare données": {
+      "main": [
+        [
+          {
+            "node": "Envois à API Ollama",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Envois à API Ollama": {
+      "main": [
+        [
+          {
+            "node": "Mise en forme données",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "322a3507-2d60-4d87-ad6b-cfe1bac888fe",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9d30d1f1874df20c0dc0c5e334ba45c46152a3794403b022f504026a467e081f"
+  },
+  "id": "pLi736g9z0gM8ZFvIyNiP",
+  "tags": []
+}
