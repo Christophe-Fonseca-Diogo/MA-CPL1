@@ -31,7 +31,7 @@ On peut voir que la création du fichier fonctionne :
 
 Les données sont bien dans le fichier :
 
-<img width="703" height="597" alt="image" src="https://github.com/user-attachments/assets/d76815f5-166d-4f9b-8cd4-c3630e5a3ee0" />
+<img width="666" height="756" alt="image" src="https://github.com/user-attachments/assets/6af5363e-37c1-439e-87f5-aeb6b6830a94" />
 
 
 On voit que le workflow est correctement exécuté.
