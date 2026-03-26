@@ -27,6 +27,7 @@ Le TP1 est fonctionnel.
 
 On peut voir que la création du fichier fonctionne :
 <img width="311" height="305" alt="image" src="https://github.com/user-attachments/assets/ec7c88e1-927b-48ef-b6ac-b40d4e66d300" />
+
 Les données sont bien dans le fichier :
 <img width="703" height="597" alt="image" src="https://github.com/user-attachments/assets/d76815f5-166d-4f9b-8cd4-c3630e5a3ee0" />
 
