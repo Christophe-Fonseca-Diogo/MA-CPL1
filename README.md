@@ -1,6 +1,6 @@
 # MA-CPL1
 
-
+## TP 1
 Résultat :
 
 La première fois on peut apercevoir ce résultat :
@@ -21,4 +21,10 @@ Ensuite on obtient le résultat suivant.
 On voit que le workflow est correctement exécuté.
 <img width="712" height="170" alt="image" src="https://github.com/user-attachments/assets/7510b555-2110-4e05-87d6-7cdebafc57d1" />
 
-Le TP est fonctionnel.
+Le TP1 est fonctionnel.
+
+## TP 2
+
+
+On voit quele workflow est correctement exécuté.
+<img width="1593" height="492" alt="image" src="https://github.com/user-attachments/assets/b2e2bd34-a817-40c0-8ace-293963991636" />
