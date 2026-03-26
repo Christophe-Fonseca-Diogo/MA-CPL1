@@ -34,5 +34,5 @@ Les données sont bien dans le fichier :
 <img width="703" height="597" alt="image" src="https://github.com/user-attachments/assets/d76815f5-166d-4f9b-8cd4-c3630e5a3ee0" />
 
 
-On voit quele workflow est correctement exécuté.
+On voit que le workflow est correctement exécuté.
 <img width="1593" height="492" alt="image" src="https://github.com/user-attachments/assets/b2e2bd34-a817-40c0-8ace-293963991636" />
