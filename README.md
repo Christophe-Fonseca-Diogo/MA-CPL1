@@ -37,6 +37,8 @@ Les données sont bien dans le fichier et on voit que l'embedding est bien ajout
 On voit que le workflow est correctement exécuté.
 <img width="1593" height="492" alt="image" src="https://github.com/user-attachments/assets/b2e2bd34-a817-40c0-8ace-293963991636" />
 
+Le TP2 est fonctionnel.
+
 ## TP 3 (n8nSimilarité)
 
 On obtient le résultat suivant :
@@ -46,3 +48,18 @@ On obtient le résultat suivant :
 On voit que le workflow est correctement exécuté.
 
 <img width="1196" height="523" alt="image" src="https://github.com/user-attachments/assets/87024f8a-9b80-4c5e-95ad-fe6549e34e1a" />
+
+Le TP3 est fonctionnel.
+
+## TP 4 (n8nRAG)
+
+On obtient le résultat suivant :
+
+<img width="447" height="443" alt="image" src="https://github.com/user-attachments/assets/9cb41aa9-2904-4b15-8eb5-1e6b0469a21d" />
+
+
+On voit que le workflow est correctement exécuté.
+
+<img width="1524" height="519" alt="image" src="https://github.com/user-attachments/assets/41d1fe4a-f5d6-49ca-be3b-e3673d1a7035" />
+
+Le TP4 est fonctionnel.
