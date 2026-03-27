@@ -36,3 +36,13 @@ Les données sont bien dans le fichier et on voit que l'embedding est bien ajout
 
 On voit que le workflow est correctement exécuté.
 <img width="1593" height="492" alt="image" src="https://github.com/user-attachments/assets/b2e2bd34-a817-40c0-8ace-293963991636" />
+
+## TP 3 (n8nSimilarité)
+
+On obtient le résultat suivant :
+
+<img width="443" height="754" alt="image" src="https://github.com/user-attachments/assets/0019d35f-f2aa-4d65-81ac-8561ff22871e" />
+
+On voit que le workflow est correctement exécuté.
+
+<img width="1196" height="523" alt="image" src="https://github.com/user-attachments/assets/87024f8a-9b80-4c5e-95ad-fe6549e34e1a" />
