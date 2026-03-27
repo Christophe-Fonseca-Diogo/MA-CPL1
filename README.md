@@ -57,6 +57,15 @@ On obtient le résultat suivant :
 
 <img width="447" height="443" alt="image" src="https://github.com/user-attachments/assets/9cb41aa9-2904-4b15-8eb5-1e6b0469a21d" />
 
+Version json :
+
+```json
+[
+  {
+    "generated_reply": " Bonjour Christophe Fonseca,\n\nMerci pour votre demande de rendez-vous. Je suis disponible la semaine prochaine et pourraîtré répondre à votre appel de manière immédiate. Pour faciliter le choix de date, pouvez-vous me donner quelques dates qui pourraient vous convenir? Je suis à votre disposition pour discuter de manière plus détaillée.\n\nA bientôt,\n[Votre nom]\n[Votre fonction]"
+  }
+]
+```
 
 On voit que le workflow est correctement exécuté.
 
