@@ -1,0 +1,34 @@
+1. Quel événement déclenche le Microsoft Outlook Trigger ? 
+
+Dès qu'un e-mail est reçu dans la boite e-mail.
+
+
+2. Pourquoi le polling est-il configuré Every Minute ?
+
+Pour récupérer toutes les minutes les nouveaux e-mails.
+
+3. Quelles informations d’un email pourraient être utilisées pour automatiser un 
+traitement ?
+
+Les informations suivantes :
+  
+"subject": 
+"bodyPreview": 
+"from": 
+"to":  
+"categories":  
+"hasAttachments":
+
+C'est les paramètres du json et on peu faire des filtres avancés comme :
+
+Filter Query
+Has Attachements
+Folders to exclude
+Folders to include
+Read Status
+Sender
+
+et les options :
+
+Attachements Prefix
+Et Donwload Attachements.
