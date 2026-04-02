@@ -1,5 +1,10 @@
 # MA-CPL1
 
+## TP Configuration
+
+La configuration fonctionne correctement :
+<img width="1870" height="763" alt="Résultat" src="https://github.com/user-attachments/assets/e4ac28b1-5f13-45b7-9cfb-004eb57c7263" />
+
 ## TP 1
 Résultat :
 
