@@ -1,0 +1,336 @@
+{
+  "name": "TP5_ n8n-AutoReply_ChristopheFonsecaDiogo",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {},
+        "options": {}
+      },
+      "type": "n8n-nodes-base.microsoftOutlookTrigger",
+      "typeVersion": 1,
+      "position": [
+        -144,
+        -16
+      ],
+      "id": "89225631-14b3-4fa0-b555-b3a185e47c6c",
+      "name": "Microsoft Outlook Trigger",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "1jTFr21XJm7DQkAv",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => { \nconst subject = item.json.subject || \"\"; \nconst body = item.json.body || \"\"; \nreturn { \njson: { \n...item.json, \ntext_for_embedding: `search_query: Objet: \n${subject}\\nMessage:\\n${body}` \n} \n}; \n}); "
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        64,
+        -16
+      ],
+      "id": "a188f0e3-783f-4ca6-a07c-ccc3e801dd95",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://gpu.cpnv.me:11434/api/embeddings",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "nomic-embed-text-v2-moe"
+            },
+            {
+              "name": "prompt",
+              "value": "={{ $json.text_for_embedding }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        304,
+        -336
+      ],
+      "id": "72370e49-94f5-4f89-93b0-11ef304c3a0d",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        368,
+        -16
+      ],
+      "id": "c2b4b220-27bb-47d2-9bf8-73716424f470",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "fileSelector": "/data/embeddingsChristopheFonsecaDiogo.json",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        592,
+        -208
+      ],
+      "id": "8ad2d1f2-8300-4c0b-984c-029f01735969",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "operation": "fromJson",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        832,
+        -208
+      ],
+      "id": "8628113c-bdc8-4086-bd2e-9be0c67b8c0a",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst raw = $input.all();\n\nlet emails = [];\n\nraw.forEach(item => {\n  const dataArray = item.json.data || [];\n\n  dataArray.forEach(d => {\n    if (d.line) {\n      try {\n        const parsed = JSON.parse(d.line);\n\n        emails.push({\n          subject: parsed.subject || \"\",\n          body_text: parsed.body_text || \"\"\n        });\n\n      } catch (e) {}\n    }\n  });\n});\n\nif (emails.length < 2) {\n  return [\n    {\n      json: {\n        message: \"Pas assez d'emails pour calculer une similarité\",\n        count: emails.length\n      }\n    }\n  ];\n}\n\nfunction tokenize(text) {\n  if (!text) return [];\n\n  return text\n    .toLowerCase()\n    .replace(/[^\\w\\s]/g, \"\")\n    .split(/\\s+/)\n    .filter(Boolean);\n}\n\nfunction buildVocabulary(docs) {\n  const vocab = new Set();\n\n  docs.forEach(doc => {\n    tokenize(doc).forEach(word => vocab.add(word));\n  });\n\n  return Array.from(vocab);\n}\n\nfunction textToVector(text, vocab) {\n  const words = tokenize(text);\n\n  const freq = {};\n  words.forEach(w => {\n    freq[w] = (freq[w] || 0) + 1;\n  });\n\n  return vocab.map(word => freq[word] || 0);\n}\n\nfunction dot(a, b) {\n  return a.reduce((sum, v, i) => sum + v * b[i], 0);\n}\n\nfunction magnitude(v) {\n  return Math.sqrt(v.reduce((s, x) => s + x * x, 0));\n}\n\nfunction cosine(a, b) {\n  const denom = magnitude(a) * magnitude(b);\n  if (!denom) return 0;\n  return dot(a, b) / denom;\n}\n\nconst vocab = buildVocabulary(emails.map(e => e.body_text));\n\nconst vectors = emails.map(e => textToVector(e.body_text, vocab));\n\nconst avgVector = [];\n\nfor (let i = 0; i < vocab.length; i++) {\n  let sum = 0;\n\n  for (let j = 0; j < vectors.length; j++) {\n    sum += vectors[j][i];\n  }\n\n  avgVector.push(sum / vectors.length);\n}\n\nconst results = emails.map((email, i) => {\n  const vec = vectors[i];\n  const similarity = cosine(vec, avgVector);\n\n  return {\n    json: {\n      subject: email.subject,\n      body_text: email.body_text,\n      similarity: Number(similarity.toFixed(2))\n    }\n  };\n});\n\nresults.sort((a, b) => b.json.similarity - a.json.similarity);\n\nreturn results;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1088,
+        208
+      ],
+      "id": "5cbd5ba5-dc4f-43aa-8e67-eee7f0422b41",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Récupère les 3 similaires (input)\n\nconst emails = $input.all().slice(0,3);\n \n// Reconstruit l'email entrant depuis le 1er embedding (contexte préservé)\n\nconst incoming = {\n\n  subject: $('Microsoft Outlook Trigger').first().json.subject,\n\n  sender: $('Microsoft Outlook Trigger').first().json.from,\n\n  body: $('Microsoft Outlook Trigger').first().json.bodyPreview\n\n};\n \n// FORMAT EXACT (une seule ligne)\n\nconst prompt = `EMAIL REÇU Sujet: ${incoming.subject} Expéditeur: ${incoming.sender} Contenu: ${incoming.body} EMAILS SIMILAIRES Email 1: Sujet: ${emails[0].json.subject} Contenu: ${emails[0].json.body_text} Email 2: Sujet: ${emails[1]?.json.subject} Contenu: ${emails[1]?.json.body_text} Email 3: Sujet: ${emails[2]?.json.subject} Contenu: ${emails[2]?.json.body_text} CONSIGNE Rédige une réponse professionnelle.`;\n \n// Debug (optionnel)\n\nconsole.log(prompt);\n \nreturn [{ json: { rag_prompt: prompt } }];\n "
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1328,
+        208
+      ],
+      "id": "b18586e9-5aa1-4632-a559-e9d07433addd",
+      "name": "Build RAG Prompt"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://gpu.cpnv.me:11434/api/generate",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"mistral\",\n  \"prompt\": {{ JSON.stringify($json.rag_prompt) }},\n  \"stream\": false\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1584,
+        208
+      ],
+      "id": "c5027209-f58f-4ae3-bda0-8fa3a9342889",
+      "name": "HTTP Request Generate Reply"
+    },
+    {
+      "parameters": {
+        "jsCode": "// On récupère tous les items en entrée\nreturn items.map(item => {\n  return {\n    json: {\n      generated_reply: item.json.response\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1792,
+        208
+      ],
+      "id": "335f6374-1480-465b-acde-35ca5a1a1672",
+      "name": "Format Generated Reply"
+    },
+    {
+      "parameters": {
+        "operation": "reply",
+        "messageId": {
+          "__rl": true,
+          "value": "={{ $('Microsoft Outlook Trigger').first().json.id }}",
+          "mode": "id"
+        },
+        "message": "={{ $json.generated_reply.replace(/\\n/g, \"<br>\") }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.microsoftOutlook",
+      "typeVersion": 2,
+      "position": [
+        2048,
+        208
+      ],
+      "id": "fb53974c-c05d-430e-9298-ff9b1931675c",
+      "name": "Microsoft Outlook Reply",
+      "webhookId": "956cb7ce-20f0-477c-9463-f98ead7e7e65",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "1jTFr21XJm7DQkAv",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Microsoft Outlook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Build RAG Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build RAG Prompt": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request Generate Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request Generate Reply": {
+      "main": [
+        [
+          {
+            "node": "Format Generated Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Generated Reply": {
+      "main": [
+        [
+          {
+            "node": "Microsoft Outlook Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "5ac11cf4-45ac-4d44-8b08-679f4d516165",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9d30d1f1874df20c0dc0c5e334ba45c46152a3794403b022f504026a467e081f"
+  },
+  "id": "TW49XbQQ1noZKJt8",
+  "tags": []
+}
